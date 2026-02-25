@@ -2,15 +2,16 @@ name: PHP CI/CD Pipeline
 
 on:
   push:
-    branches: [ main ]
+    branches:
+      - main
 
 jobs:
-  php-ci-cd:
+  build-and-deploy:
     runs-on: ubuntu-latest
 
     steps:
-    - name: Checkout code
-      uses: actions/checkout@v3
+    - name: Checkout Code
+      uses: actions/checkout@v4
 
     - name: Setup PHP
       uses: shivammathur/setup-php@v2
@@ -19,12 +20,10 @@ jobs:
 
     - name: PHP Syntax Check
       run: |
-        find . -name "*.php" \
-        ! -path "./library/*" \
-        ! -path "./SQL file/*" \
-        -exec php -l {} \;
+        find . -name "*.php" -exec php -l {} \;
 
-    - name: Deploy to Hosting Server
+    - name: Deploy to Server via FTP
+      if: success()
       uses: SamKirkland/FTP-Deploy-Action@v4
       with:
         server: ${{ secrets.FTP_SERVER }}

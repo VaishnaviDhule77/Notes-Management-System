@@ -6,34 +6,39 @@ on:
       - main
   pull_request:
 
+permissions:
+  contents: read
+
 jobs:
   ci:
-    name: PHP CI (Syntax Check)
+    name: PHP CI (Syntax Validation)
     runs-on: ubuntu-latest
 
     steps:
-      - name: Checkout code
+      - name: Checkout repository
         uses: actions/checkout@v4
 
       - name: Setup PHP
         uses: shivammathur/setup-php@v2
         with:
           php-version: '8.1'
+          tools: php
+          coverage: none
 
       - name: Run PHP syntax check
         run: |
-          echo "Checking PHP files..."
-          for file in $(find . -name "*.php"); do
-            php -l "$file"
-          done
+          echo "Starting PHP syntax check..."
+          set -e
+          find . -type f -name "*.php" -print0 | xargs -0 -n1 php -l
 
   deploy:
-    name: Deployment
-    runs-on: ubuntu-latest
+    name: Deploy to Hosting Server
     needs: ci
+    runs-on: ubuntu-latest
+    if: github.ref == 'refs/heads/main'
 
     steps:
-      - name: Checkout code
+      - name: Checkout repository
         uses: actions/checkout@v4
 
       - name: Deploy via FTP
@@ -43,3 +48,7 @@ jobs:
           username: ${{ secrets.FTP_USERNAME }}
           password: ${{ secrets.FTP_PASSWORD }}
           server-dir: /public_html/
+          exclude: |
+            **/.git*
+            **/.github/**
+            **/node_modules/**

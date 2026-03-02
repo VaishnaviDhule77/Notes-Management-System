@@ -2,8 +2,7 @@ name: PHP CD Pipeline
 
 on:
   push:
-    branches:
-      - main
+    branches: [ main ]
 
 jobs:
   deploy:
@@ -13,10 +12,10 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
 
-      - name: Deploy to Hosting via FTP
+      - name: Deploy via FTP
         uses: SamKirkland/FTP-Deploy-Action@v4
         with:
           server: ${{ secrets.FTP_SERVER }}
           username: ${{ secrets.FTP_USERNAME }}
           password: ${{ secrets.FTP_PASSWORD }}
-          server-dir: /public_html/
+          server-dir: ${{ secrets.FTP_REMOTE_DIR }}

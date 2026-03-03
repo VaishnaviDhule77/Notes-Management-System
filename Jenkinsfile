@@ -3,7 +3,7 @@ pipeline {
 
     environment {
         PHP_PATH    = 'C:\\xampp\\php\\php.exe'
-        DEPLOY_PATH = 'C:\\xampp\\htdocs\\Student-Notes'
+        DEPLOY_PATH = 'C:\\xampp\\htdocs\\Student-Notes-Management-System-PHP2'
     }
 
     stages {

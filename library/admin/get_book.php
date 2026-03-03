@@ -35,7 +35,7 @@ if($query -> rowCount() > 0){
 <img src="bookimg/<?php echo htmlentities($result->bookImage); ?>" width="120"><br />
       <?php echo htmlentities($result->BookName); ?><br />
     
-<?php else:?>
+<?php ?>
 <input type="radio" name="bookid" value="<?php echo htmlentities($result->bookid); ?>" required>
 <input type="hidden" name="aqty" value="<?php echo htmlentities($aqty); ?>" required>
 <?php endif;?>

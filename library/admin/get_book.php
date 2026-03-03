@@ -38,7 +38,7 @@ if($query -> rowCount() > 0){
 <?php ?>
 <input type="radio" name="bookid" value="<?php echo htmlentities($result->bookid); ?>" required>
 <input type="hidden" name="aqty" value="<?php echo htmlentities($aqty); ?>" required>
-<?php endif;?>
+<?php ?>
   </th>
     <?php  echo "<script>$('#submit').prop('disabled',false);</script>";
 }

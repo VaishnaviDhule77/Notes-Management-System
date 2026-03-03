@@ -10,7 +10,7 @@ pipeline {
         stage('Clone Repository') {
             steps {
                 git branch: 'main',
-                    url: 'https://github.com/<VaishnaviDhule77>/Student-Notes-Management-System.git'
+                    url: 'https://github.com/VaishnaviDhule77/Student-Notes-Management-System.git'
             }
         }
 

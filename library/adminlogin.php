@@ -1,14 +1,11 @@
 <?php
-if (session_status() === PHP_SESSION_NONE) {
-    session_start();
-}
+session_start();
+
 if(isset($_SESSION['login'])) {
     header("Location: index.php");
     exit();
 }
-?>
-<?php
-session_start();
+
 error_reporting(0);
 include('includes/config.php');
 if($_SESSION['alogin']!=''){

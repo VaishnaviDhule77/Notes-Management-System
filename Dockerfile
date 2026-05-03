@@ -1,7 +1,10 @@
 FROM php:8.2-apache
 
-# Copy project files
-COPY . /var/www/html/
+# Set working directory
+WORKDIR /var/www/html
+
+# Copy ONLY the library folder contents
+COPY ./library/ /var/www/html/
 
 # Enable mysqli
 RUN docker-php-ext-install mysqli

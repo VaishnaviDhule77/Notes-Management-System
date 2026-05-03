@@ -1,6 +1,8 @@
 <?php
-echo "TEST PAGE LOADING";
-exit;
+error_reporting(E_ALL);
+ini_set('display_errors', 1);
+
+echo "START<br>";
 ?>
 <?php
 session_start();
@@ -11,7 +13,7 @@ if(isset($_SESSION['login'])) {
 }
 
 error_reporting(0);
-include('includes/config.php');
+// include('includes/config.php');
 if($_SESSION['alogin']!=''){
 $_SESSION['alogin']='';
 }

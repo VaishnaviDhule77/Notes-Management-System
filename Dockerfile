@@ -1,13 +1,12 @@
 FROM php:8.2-apache
 
-# Set working directory
 WORKDIR /var/www/html
 
-# Copy ONLY the library folder contents
+# Copy project
 COPY ./library/ /var/www/html/
 
-# Enable mysqli
-RUN docker-php-ext-install mysqli
+# Install BOTH mysqli + PDO MySQL
+RUN docker-php-ext-install mysqli pdo pdo_mysql
 
 # Set permissions
 RUN chown -R www-data:www-data /var/www/html

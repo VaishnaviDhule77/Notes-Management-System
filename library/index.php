@@ -1,7 +1,11 @@
 <?php
-include("db.php");
-?>
+session_start();
 
+if(!isset($_SESSION['login'])) {
+    header("Location: adminlogin.php");
+    exit();
+}
+?>
 <?php
 session_start();
 error_reporting(0);

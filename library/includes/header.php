@@ -11,7 +11,7 @@
                 </a>
 
             </div>
-<?php if($_SESSION['login'])
+<?php if(isset($_SESSION['login']) && $_SESSION['login']!="")
 {
 ?> 
             <div class="right-div">
@@ -21,7 +21,7 @@
         </div>
     </div>
     <!-- LOGO HEADER END-->
-<?php if($_SESSION['login'])
+<?php if(isset($_SESSION['login']) && $_SESSION['login']!="")
 {
 ?>    
 <section class="menu-section">

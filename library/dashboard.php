@@ -2,9 +2,10 @@
 session_start();
 error_reporting(0);
 include('includes/config.php');
-if(strlen($_SESSION['login'])==0)
-  { 
-header('location:index.php');
+if(!isset($_SESSION['login']) || strlen($_SESSION['login']) == 0)
+{ 
+    header('location:index.php');
+    exit(); // Crucial: Stop the script from running further
 }
 else{?>
 <!DOCTYPE html>

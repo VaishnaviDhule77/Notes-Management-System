@@ -1,9 +1,16 @@
 <?php
-error_reporting(E_ALL);
+session_start();
+include('includes/config.php');
+error_reporting(E_ALL); // Use 0 for live, E_ALL for debugging
 ini_set('display_errors', 1);
+
+// Clear session if they hit this page to ensure a fresh login
+if(isset($_SESSION['login']) && $_SESSION['login'] != ''){
+    $_SESSION['login'] = '';
+}
+// ... rest of your login logic ...
 ?>
 <?php
-session_start();
 
 if(!isset($_SESSION['login'])) {
     header("Location: adminlogin.php");

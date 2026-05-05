@@ -1,6 +1,7 @@
 <?php
 error_reporting(E_ALL);
 ini_set('display_errors', 1);
+ini_set('display_startup_errors', 1);
 ?>
 <?php
 session_start();
@@ -11,7 +12,7 @@ if(isset($_SESSION['login'])) {
 }
 
 error_reporting(0);
-// include('includes/config.php');
+include('includes/config.php');
 if($_SESSION['alogin']!=''){
 $_SESSION['alogin']='';
 }

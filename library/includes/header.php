@@ -55,8 +55,8 @@
                     <div class="navbar-collapse collapse ">
                         <ul id="menu-top" class="nav navbar-nav navbar-right">                        
                           
-      <li><a href="index.php">Home</a></li>
-      <li><a href="index.php#ulogin">User Login</a></li>
+                            <li><a href="index.php">Home</a></li>
+                            <li><a href="index.php">USER LOGIN</a></li>
                             <li><a href="signup.php">User Signup</a></li>
                          
                             <li><a href="adminlogin.php">Admin Login</a></li>

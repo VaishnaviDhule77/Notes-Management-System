@@ -52,8 +52,7 @@ header('location:manage-categories.php');
                 <h4 class="header-line">Manage Categories</h4>
     </div>
      <div class="row">
-    <?php if($_SESSION['error']!="")
-    {?>
+<?php if(isset($_SESSION['error']) && $_SESSION['error']!="") { ?>
 <div class="col-md-6">
 <div class="alert alert-danger" >
  <strong>Error :</strong> 
@@ -62,8 +61,7 @@ header('location:manage-categories.php');
 </div>
 </div>
 <?php } ?>
-<?php if($_SESSION['msg']!="")
-{?>
+<?php if(isset($_SESSION['msg']) && $_SESSION['msg']!="") { ?>
 <div class="col-md-6">
 <div class="alert alert-success" >
  <strong>Success :</strong> 
@@ -72,7 +70,7 @@ header('location:manage-categories.php');
 </div>
 </div>
 <?php } ?>
-<?php if($_SESSION['updatemsg']!="")
+<?php if(isset($_SESSION['updatemsg']) && $_SESSION['updatemsg']!="")
 {?>
 <div class="col-md-6">
 <div class="alert alert-success" >
@@ -137,9 +135,12 @@ foreach($results as $result)
                                             <a href="#" class="btn btn-danger btn-xs">Inactive</a>
                                             <?php } ?></td>
                                             <td class="center">
-
-                                            <a href="edit-category.php?catid=<?php echo htmlentities($result->id);?>"><button class="btn btn-primary"><i class="fa fa-edit "></i> Edit</button> 
-                                          <a href="manage-categories.php?del=<?php echo htmlentities($result->id);?>" onclick="return confirm('Are you sure you want to delete?');"" >  <button class="btn btn-danger"><i class="fa fa-pencil"></i> Delete</button>
+                                                <a href="edit-category.php?catid=<?php echo htmlentities($result->id);?>">
+                                                    <button class="btn btn-primary"><i class="fa fa-edit "></i> Edit</button>
+                                                </a>
+                                                <a href="manage-categories.php?del=<?php echo htmlentities($result->id);?>" onclick="return confirm('Are you sure you want to delete?');">
+                                                    <button class="btn btn-danger"><i class="fa fa-pencil"></i> Delete</button>
+                                                </a>
                                             </td>
                                         </tr>
  <?php $cnt=$cnt+1;}} ?>                                      

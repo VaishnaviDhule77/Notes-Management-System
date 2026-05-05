@@ -19,44 +19,44 @@ if(!isset($_SESSION['login'])) {
 ?>
 <?php
 session_start();
-error_reporting(0);
 include('includes/config.php');
-if($_SESSION['login']!=''){
-$_SESSION['login']='';
-}
-if(isset($_POST['login']))
-{
 
-$email=$_POST['emailid'];
-$password=md5($_POST['password']);
-$sql ="SELECT EmailId,Password,StudentId,Status FROM tblstudents WHERE EmailId=:email and Password=:password";
-$query= $dbh -> prepare($sql);
-$query-> bindParam(':email', $email, PDO::PARAM_STR);
-$query-> bindParam(':password', $password, PDO::PARAM_STR);
-$query-> execute();
-$results=$query->fetchAll(PDO::FETCH_OBJ);
+// 1. CLEAR ERRORS FOR THE LIVE SITE (Recommended for your placement)
+error_reporting(0); 
+ini_set('display_errors', 0);
 
-if($query->rowCount() > 0)
-{
- foreach ($results as $result) {
- $_SESSION['stdid']=$result->StudentId;
-if($result->Status==1)
-{
-$_SESSION['login']=$_POST['emailid'];
-echo "<script type='text/javascript'> document.location ='dashboard.php'; </script>";
-} else {
-echo "<script>alert('Your Account Has been blocked .Please contact admin');</script>";
-
-}
+// 2. LOGOUT LOGIC (If a user is already logged in, clear it so they can log in fresh)
+if(isset($_SESSION['login']) && $_SESSION['login'] != '') {
+    $_SESSION['login'] = '';
 }
 
-} 
+// 3. LOGIN PROCESSING
+if(isset($_POST['login'])) {
+    $email = $_POST['emailid'];
+    // Using md5 because your project currently uses it for passwords
+    $password = md5($_POST['password']); 
+    
+    $sql = "SELECT EmailId, Password, StudentId, Status FROM tblstudents WHERE EmailId=:email and Password=:password";
+    $query = $dbh->prepare($sql);
+    $query->bindParam(':email', $email, PDO::PARAM_STR);
+    $query->bindParam(':password', $password, PDO::PARAM_STR);
+    $query->execute();
+    $results = $query->fetchAll(PDO::FETCH_OBJ);
 
-else{
-echo "<script>alert('Invalid Details');</script>";
+    if($query->rowCount() > 0) {
+        foreach ($results as $result) {
+            $_SESSION['stdid'] = $result->StudentId;
+            if($result->Status == 1) {
+                $_SESSION['login'] = $_POST['emailid'];
+                echo "<script type='text/javascript'> document.location ='dashboard.php'; </script>";
+            } else {
+                echo "<script>alert('Your Account Has been blocked. Please contact admin');</script>";
+            }
+        }
+    } else {
+        echo "<script>alert('Invalid Details');</script>";
+    }
 }
-}
-
 ?>
 <!DOCTYPE html>
 <html xmlns="http://www.w3.org/1999/xhtml">

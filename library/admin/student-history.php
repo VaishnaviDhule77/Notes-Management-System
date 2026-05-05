@@ -95,7 +95,7 @@ header('location:reg-students.php');
                                     <tbody>
 <?php 
 
-$sql = "SELECT tblstudents.StudentId ,tblstudents.FullName,tblstudents.EmailId,tblbooks.BookName,tblissuedbookdetails.id as rid,tblissuedbookdetails.fine,tblissuedbookdetails.RetrunStatus,tblbooks.id as bid,tblbooks.bookImage from  tblissuedbookdetails join tblstudents on tblstudents.StudentId=tblissuedbookdetails.StudentId join tblbooks on tblbooks.id=tblissuedbookdetails.BookId where tblstudents.StudentId='$sid' ";
+$sql = "SELECT tblstudents.StudentId ,tblstudents.FullName,tblstudents.EmailId,tblbooks.BookName,tblbooks.id as bid,tblbooks.bookImage from  tblissuedbookdetails join tblstudents on tblstudents.StudentId=tblissuedbookdetails.StudentId join tblbooks on tblbooks.id=tblissuedbookdetails.BookId where tblstudents.StudentId='$sid' ";
 $query = $dbh -> prepare($sql);
 $query->execute();
 $results=$query->fetchAll(PDO::FETCH_OBJ);

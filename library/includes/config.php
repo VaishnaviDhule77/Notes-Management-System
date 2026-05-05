@@ -1,14 +1,15 @@
 <?php
+error_reporting(E_ALL);
+ini_set('display_errors', 1);
+
 try {
     $dbh = new PDO(
         "mysql:host=tramway.proxy.rlwy.net;port=57323;dbname=railway",
         "root",
         "qrrAyQvwCpvyUsSHZGqufKaWXfSIUINs"
     );
-
-    $dbh->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
-
+    echo "DB CONNECTED";
 } catch (PDOException $e) {
-    die("DB Connection Failed: " . $e->getMessage());
+    die("DB ERROR: " . $e->getMessage());
 }
 ?>

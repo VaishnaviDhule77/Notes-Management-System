@@ -8,7 +8,6 @@ ini_set('display_startup_errors', 1);
 session_start();
 
 $_SESSION['alogin'] = "";
-    exit();
 error_reporting(0);
 include('includes/config.php');
 if($_SESSION['alogin']!=''){

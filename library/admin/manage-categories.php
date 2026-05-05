@@ -82,8 +82,7 @@ header('location:manage-categories.php');
 <?php } ?>
 
 
-   <?php if($_SESSION['delmsg']!="")
-    {?>
+   <?php if(isset($_SESSION['delmsg']) && $_SESSION['delmsg']!="") { ?>
 <div class="col-md-6">
 <div class="alert alert-success" >
  <strong>Success :</strong> 

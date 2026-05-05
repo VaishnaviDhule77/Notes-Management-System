@@ -1,16 +1,14 @@
 <?php
 error_reporting(E_ALL);
 ini_set('display_errors', 1);
+ini_set('display_errors', 1);
 ini_set('display_startup_errors', 1);
 ?>
 <?php
 session_start();
 
-if(isset($_SESSION['login'])) {
-    header("Location: index.php");
+$_SESSION['alogin'] = "";
     exit();
-}
-
 error_reporting(0);
 include('includes/config.php');
 if($_SESSION['alogin']!=''){
@@ -29,7 +27,8 @@ $results=$query->fetchAll(PDO::FETCH_OBJ);
 if($query->rowCount() > 0)
 {
 $_SESSION['alogin']=$_POST['username'];
-echo "<script type='text/javascript'> document.location ='admin/dashboard.php'; </script>";
+header("Location: admin/dashboard.php");
+exit();
 } else{
 echo "<script>alert('Invalid Details');</script>";
 }

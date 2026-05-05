@@ -8,7 +8,7 @@ try {
         "root",
         "qrrAyQvwCpvyUsSHZGqufKaWXfSIUINs"
     );
-    echo "DB CONNECTED";
+    //echo "DB CONNECTED";
 } catch (PDOException $e) {
     die("DB ERROR: " . $e->getMessage());
 }

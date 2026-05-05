@@ -155,7 +155,7 @@ if($query->rowCount() > 0)
 {
 foreach($results as $result)
 {               ?>  
-<option value="<?php echo htmlentities($result->id);?>"><?php echo htmlentities($result->AuthorName);?></option>
+<option value="<?php echo htmlentities($result->id);?>"><?php echo htmlentities($result->AuthorName ?? ''); ?></option>
  <?php }} ?> 
 </select>
 </div></div >

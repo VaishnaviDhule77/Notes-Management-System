@@ -141,7 +141,7 @@ error:function (){}
                 <select name="course" id="course">
                     <option value="B.sc(cs)"> B.sc(cs)</option>
                     <option value="M.sc(chemistry)"> M.sc(chemistry)</option>
-                 </select> <br><br></div> >
+                 </select> <br><br></div> 
 
 <div class="form-group">
 

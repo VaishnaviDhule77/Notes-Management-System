@@ -1,63 +1,75 @@
 <?php
+// STEP 1: Always start session first and enable output buffering
+ob_start(); 
 session_start();
-error_reporting(0);
+
+// STEP 2: Error reporting should be ON during debugging so you can see fixes, 
+// but we will add logic to handle the specific errors you saw.
+error_reporting(E_ALL); 
+ini_set('display_errors', 1);
+
 include('includes/config.php');
-if(strlen($_SESSION['alogin'])==0)
-    {   
-header('location:index.php');
-}
-else{ 
 
-if(isset($_POST['add']))
-{
-$bookname=$_POST['bookname'];
-$category=$_POST['category'];
-$price=$_POST['price'];
-$bookimg=$_FILES["bookpic"]["name"];
-$bookpdf=$_FILES["bookpdf"]["name"];
+// STEP 3: Safety check for Session. 
+// We use isset() and empty() to prevent the "Undefined global variable" error.
+if(!isset($_SESSION['alogin']) || strlen((string)$_SESSION['alogin']) == 0) {   
+    header('location:index.php');
+    exit(); // Always use exit after a header redirect
+} else { 
 
-// get the image extension
-$extension = substr($bookimg,strlen($bookimg)-4,strlen($bookimg));
-$extension2 =substr($bookpdf,strlen($bookpdf)-4,strlen($bookpdf));
-// allowed extensions
-$allowed_extensions = array(".jpg","jpeg",".png",".gif");
-$allowed_extensions2 = array(".pdf");
-// Validation for allowed extensions .in_array() function searches an array for a specific value.
-//rename the image file
-$imgnewname=md5($bookimg.time()).$extension;
-$pdfnewname=md5($bookpdf.time()).$extension2;
-// Code for move image into directory
+    if(isset($_POST['add'])) {
+        $bookname = $_POST['bookname'];
+        $category = $_POST['category'];
+        // $price = $_POST['price']; // Uncomment if used in your DB
 
-if(!in_array($extension,$allowed_extensions))
-{
-echo "<script>alert('Invalid format. Only jpg / jpeg/ png /gif format allowed');</script>";
-}
-else
-{
-if(!in_array($extension2,$allowed_extensions2)){
-    echo "<script>alert('Invalid format. Only pdf format allowed');</script>";
-}else{
-  if(move_uploaded_file($_FILES["bookpic"]["tmp_name"],"bookimg/".$imgnewname)){
-    if(move_uploaded_file($_FILES["bookpdf"]["tmp_name"],"bookpdf/".$pdfnewname)){
-$sql="INSERT INTO  tblbooks(BookName,CatId,bookImage,bookpdf) VALUES(:bookname,:category,:imgnewname,:pdfnewname)";
-$query = $dbh->prepare($sql);
-$query->bindParam(':bookname',$bookname,PDO::PARAM_STR);
-$query->bindParam(':category',$category,PDO::PARAM_STR);
-$query->bindParam(':imgnewname',$imgnewname,PDO::PARAM_STR);
-$query->bindParam(':pdfnewname',$pdfnewname,PDO::PARAM_STR);
-$query->execute();
-$lastInsertId = $dbh->lastInsertId();
-if($lastInsertId)
-{
-echo "<script>alert('Book Listed successfully');</script>";
-echo "<script>window.location.href='manage-books.php'</script>";
-}
-else 
-{
-echo "<script>alert('Something went wrong. Please try again');</script>";    
-echo "<script>window.location.href='manage-books.php'</script>";
-}
-}}}}}
+        // STEP 4: Safety check for Files
+        // If the upload was too big, these indexes won't exist.
+        if(!isset($_FILES['bookpic']) || !isset($_FILES['bookpdf'])) {
+            echo "<script>alert('File size too large. Please check server limits.');</script>";
+        } else {
+            $bookimg = $_FILES["bookpic"]["name"];
+            $bookpdf = $_FILES["bookpdf"]["name"];
+
+            // Get extensions safely
+            $extension = strtolower(pathinfo($bookimg, PATHINFO_EXTENSION));
+            $extension2 = strtolower(pathinfo($bookpdf, PATHINFO_EXTENSION));
+
+            $allowed_extensions = array("jpg", "jpeg", "png", "gif");
+            $allowed_extensions2 = array("pdf");
+
+            $imgnewname = md5($bookimg . time()) . "." . $extension;
+            $pdfnewname = md5($bookpdf . time()) . "." . $extension2;
+
+            if(!in_array($extension, $allowed_extensions)) {
+                echo "<script>alert('Invalid image format.');</script>";
+            } else if(!in_array($extension2, $allowed_extensions2)) {
+                echo "<script>alert('Invalid PDF format.');</script>";
+            } else {
+                // Move files
+                if(move_uploaded_file($_FILES["bookpic"]["tmp_name"], "bookimg/".$imgnewname)) {
+                    if(move_uploaded_file($_FILES["bookpdf"]["tmp_name"], "bookpdf/".$pdfnewname)) {
+                        
+                        $sql = "INSERT INTO tblbooks(BookName, CatId, bookImage, bookpdf) VALUES(:bookname, :category, :imgnewname, :pdfnewname)";
+                        $query = $dbh->prepare($sql);
+                        $query->bindParam(':bookname', $bookname, PDO::PARAM_STR);
+                        $query->bindParam(':category', $category, PDO::PARAM_STR);
+                        $query->bindParam(':imgnewname', $imgnewname, PDO::PARAM_STR);
+                        $query->bindParam(':pdfnewname', $pdfnewname, PDO::PARAM_STR);
+                        $query->execute();
+                        
+                        $lastInsertId = $dbh->lastInsertId();
+                        if($lastInsertId) {
+                            echo "<script>alert('Book Listed successfully');</script>";
+                            echo "<script>window.location.href='manage-books.php'</script>";
+                        } else {
+                            echo "<script>alert('Database error. Please try again.');</script>";
+                        }
+                    }
+                }
+            }
+        }
+    }
+
 ?>
 <!DOCTYPE html>
 <html xmlns="http://www.w3.org/1999/xhtml">

@@ -1,5 +1,6 @@
 <?php
-// 1. Start output buffering to prevent "Headers already sent" errors
+// This stops the Warning from printing and breaking the session
+ini_set('display_errors', 0); 
 ob_start();
 session_start();
 

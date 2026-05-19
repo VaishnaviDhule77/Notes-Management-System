@@ -85,7 +85,7 @@ if(isset($_POST['login'])) {
         </div>
     </div>
     
-    <div class="row">
+    <div class="row" id="login-section">
         <div class="col-md-6 col-sm-6 col-xs-12 col-md-offset-3" >
             <div class="panel panel-info">
                 <div class="panel-heading">LOGIN FORM</div>

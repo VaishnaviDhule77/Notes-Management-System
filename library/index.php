@@ -2,13 +2,14 @@
 session_start();
 include('includes/config.php');
 
-// 1. CLEAR ERRORS FOR THE LIVE SITE 
-error_reporting(0); 
-ini_set('display_errors', 0);
+// 1. TEMPORARILY ENABLE ERRORS TO DEBUG DATABASE ISSUES
+error_reporting(E_ALL); 
+ini_set('display_errors', 1);
 
-// 2. LOGOUT LOGIC (If a user is already logged in, clear it so they can log in fresh)
+// 2. REPLACEMENT GUARD: If already logged in properly, bypass the form and skip straight to dashboard
 if(isset($_SESSION['login']) && $_SESSION['login'] != '') {
-    $_SESSION['login'] = '';
+    header("Location: dashboard.php");
+    exit();
 }
 
 // 3. LOGIN PROCESSING
@@ -28,7 +29,9 @@ if(isset($_POST['login'])) {
             $_SESSION['stdid'] = $result->StudentId;
             if($result->Status == 1) {
                 $_SESSION['login'] = $_POST['emailid'];
-                echo "<script type='text/javascript'> document.location ='dashboard.php'; </script>";
+                // Professional Server-Side Redirection
+                header("Location: dashboard.php");
+                exit();
             } else {
                 echo "<script>alert('Your Account Has been blocked. Please contact admin');</script>";
             }
@@ -54,7 +57,6 @@ if(isset($_POST['login'])) {
 
 <div class="content-wrapper">
 <div class="container">
-    <!--Slider---->
     <div class="row">
         <div class="col-md-10 col-sm-8 col-xs-12 col-md-offset-1">
             <div id="carousel-example" class="carousel slide slide-bdr" data-ride="carousel" >

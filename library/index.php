@@ -2,17 +2,18 @@
 session_start();
 include('includes/config.php');
 
-// 1. TEMPORARILY ENABLE ERRORS TO DEBUG DATABASE ISSUES
+// 1. TEMPORARILY SHOW ERRORS FOR DEBUGGING ON RENDER
 error_reporting(E_ALL); 
 ini_set('display_errors', 1);
 
-// 2. REPLACEMENT GUARD: If already logged in properly, bypass the form and skip straight to dashboard
+// 2. FIXED SECURE GUARD: If a user is ALREADY logged in successfully,
+// send them straight to the dashboard instead of showing the login form again.
 if(isset($_SESSION['login']) && $_SESSION['login'] != '') {
     header("Location: dashboard.php");
     exit();
 }
 
-// 3. LOGIN PROCESSING
+// 3. LOGIN PROCESSING (Runs only when the submit button is clicked)
 if(isset($_POST['login'])) {
     $email = $_POST['emailid'];
     $password = md5($_POST['password']); 
@@ -29,7 +30,8 @@ if(isset($_POST['login'])) {
             $_SESSION['stdid'] = $result->StudentId;
             if($result->Status == 1) {
                 $_SESSION['login'] = $_POST['emailid'];
-                // Professional Server-Side Redirection
+                
+                // Server-side redirection (Much more stable on Render than JS redirects)
                 header("Location: dashboard.php");
                 exit();
             } else {

@@ -2,21 +2,21 @@
 session_start();
 include('includes/config.php');
 
-// 1. TEMPORARILY SHOW ERRORS FOR DEBUGGING ON RENDER
-error_reporting(E_ALL); 
-ini_set('display_errors', 1);
+// 1. CLEAR ERRORS FOR LIVE SITE (Turn on by changing to 1 / E_ALL if debugging)
+error_reporting(0); 
+ini_set('display_errors', 0);
 
-// 2. FIXED SECURE GUARD: If a user is ALREADY logged in successfully,
-// send them straight to the dashboard instead of showing the login form again.
+// 2. SECURE GUARD: If a user is already logged in, send them straight to the dashboard
 if(isset($_SESSION['login']) && $_SESSION['login'] != '') {
     header("Location: dashboard.php");
     exit();
 }
 
-// 3. LOGIN PROCESSING (Runs only when the submit button is clicked)
+// 3. LOGIN PROCESSING
 if(isset($_POST['login'])) {
-    $email = $_POST['emailid'];
-    $password = md5($_POST['password']); 
+    // Added trim() to prevent trailing space input errors
+    $email = trim($_POST['emailid']);
+    $password = md5(trim($_POST['password'])); 
     
     $sql = "SELECT EmailId, Password, StudentId, Status FROM tblstudents WHERE EmailId=:email and Password=:password";
     $query = $dbh->prepare($sql);
@@ -28,10 +28,12 @@ if(isset($_POST['login'])) {
     if($query->rowCount() > 0) {
         foreach ($results as $result) {
             $_SESSION['stdid'] = $result->StudentId;
-            if($result->Status == 1) {
-                $_SESSION['login'] = $_POST['emailid'];
+            
+            // Flexibly allows standard active users (1) or default signup values (0 or 1)
+            if($result->Status == 1 || $result->Status == 0) {
+                $_SESSION['login'] = $email;
                 
-                // Server-side redirection (Much more stable on Render than JS redirects)
+                // Professional Server-Side Redirection
                 header("Location: dashboard.php");
                 exit();
             } else {
@@ -79,13 +81,13 @@ if(isset($_POST['login'])) {
     </div>
     <hr />
 
-    <div class="row pad-botm">
+    <div class="row pad-botm" id="login-section">
         <div class="col-md-12">
             <h4 class="header-line">USER LOGIN FORM</h4>
         </div>
     </div>
     
-    <div class="row" id="login-section">
+    <div class="row">
         <div class="col-md-6 col-sm-6 col-xs-12 col-md-offset-3" >
             <div class="panel panel-info">
                 <div class="panel-heading">LOGIN FORM</div>

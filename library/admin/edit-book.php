@@ -37,7 +37,7 @@ if(!isset($_SESSION['alogin']) || strlen((string)$_SESSION['alogin']) == 0) {
 <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1" />
-    <title>Student Notes Management System | Edit Book</title>
+    <title>Online notes Management System | Edit Book</title>
     <link href="assets/css/bootstrap.css" rel="stylesheet" />
     <link href="assets/css/font-awesome.css" rel="stylesheet" />
     <link href="assets/css/style.css" rel="stylesheet" />

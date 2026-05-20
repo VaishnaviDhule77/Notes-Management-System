@@ -2,7 +2,7 @@
 session_start();
 include('includes/config.php');
 
-// 1. CLEAR ERRORS FOR LIVE SITE (Turn on by changing to 1 / E_ALL if debugging)
+// 1. CLEAR ERRORS FOR LIVE SITE
 error_reporting(0); 
 ini_set('display_errors', 0);
 
@@ -14,33 +14,41 @@ if(isset($_SESSION['login']) && $_SESSION['login'] != '') {
 
 // 3. LOGIN PROCESSING
 if(isset($_POST['login'])) {
-    // Added trim() to prevent trailing space input errors
     $email = trim($_POST['emailid']);
-    $password = md5(trim($_POST['password'])); 
+    $passwordInput = trim($_POST['password']); 
     
-    $sql = "SELECT EmailId, Password, StudentId, Status FROM tblstudents WHERE EmailId=:email and Password=:password";
+    // Select user data matching strictly by the unique email address
+    $sql = "SELECT EmailId, Password, StudentId, Status FROM tblstudents WHERE EmailId=:email";
     $query = $dbh->prepare($sql);
     $query->bindParam(':email', $email, PDO::PARAM_STR);
-    $query->bindParam(':password', $password, PDO::PARAM_STR);
     $query->execute();
     $results = $query->fetchAll(PDO::FETCH_OBJ);
 
     if($query->rowCount() > 0) {
         foreach ($results as $result) {
-            $_SESSION['stdid'] = $result->StudentId;
             
-            // Flexibly allows standard active users (1) or default signup values (0 or 1)
-            if($result->Status == 1 || $result->Status == 0) {
-                $_SESSION['login'] = $email;
+            // VERIFY THE INPUT AGAINST THE SECURE HASH FROM SIGNUP
+            if (password_verify($passwordInput, $result->Password)) {
                 
-                // Professional Server-Side Redirection
-                header("Location: dashboard.php");
-                exit();
+                $_SESSION['stdid'] = $result->StudentId;
+                
+                // Check if account is active (1) or newly registered default (0 or 1)
+                if($result->Status == 1 || $result->Status == 0) {
+                    $_SESSION['login'] = $email;
+                    
+                    // Professional Server-Side Redirection
+                    header("Location: dashboard.php");
+                    exit();
+                } else {
+                    echo "<script>alert('Your Account Has been blocked. Please contact admin');</script>";
+                }
             } else {
-                echo "<script>alert('Your Account Has been blocked. Please contact admin');</script>";
+                // Runs if the password check fails
+                echo "<script>alert('Invalid Details');</script>";
             }
         }
     } else {
+        // Runs if the email address doesn't exist in the database
         echo "<script>alert('Invalid Details');</script>";
     }
 }

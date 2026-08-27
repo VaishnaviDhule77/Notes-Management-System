@@ -7,19 +7,16 @@ define('DB_NAME', getenv('DB_NAME') ?: 'sys');
 define('DB_PORT', getenv('DB_PORT') ?: '4000');
 
 try {
-    // Explicitly require SSL for TiDB Cloud connection without empty CA file paths
     $options = array(
         PDO::MYSQL_ATTR_INIT_COMMAND => "SET NAMES 'utf8'",
         PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION,
-        PDO::MYSQL_ATTR_SSL_VERIFY_SERVER_CERT => false
+        PDO::MYSQL_ATTR_SSL_VERIFY_SERVER_CERT => false,
     );
 
-    $dbh = new PDO(
-        "mysql:host=".DB_HOST.";port=".DB_PORT.";dbname=".DB_NAME, 
-        DB_USER, 
-        DB_PASS, 
-        $options
-    );
+    // Adding sslmode=REQUIRED forces TLS transport for TiDB Cloud Serverless
+    $dsn = "mysql:host=".DB_HOST.";port=".DB_PORT.";dbname=".DB_NAME.";sslmode=REQUIRED";
+
+    $dbh = new PDO($dsn, DB_USER, DB_PASS, $options);
 } catch (PDOException $e) {
     exit("DB ERROR: " . $e->getMessage());
 }

@@ -6,11 +6,10 @@ define('DB_NAME', getenv('DB_NAME') ?: 'sys');
 define('DB_PORT', getenv('DB_PORT') ?: '4000');
 
 try {
-    // Explicitly pass the system CA certificate bundle path for Render (Ubuntu Linux)
     $options = array(
         PDO::MYSQL_ATTR_INIT_COMMAND => "SET NAMES 'utf8'",
         PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION,
-        PDO::MYSQL_ATTR_SSL_CA => '/etc/ssl/certs/ca-certificates.crt',
+        PDO::MYSQL_ATTR_SSL_CA => __DIR__ . '/cacert.pem',
         PDO::MYSQL_ATTR_SSL_VERIFY_SERVER_CERT => false
     );
 

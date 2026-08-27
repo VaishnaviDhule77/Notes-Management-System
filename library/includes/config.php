@@ -7,12 +7,11 @@ define('DB_NAME', getenv('DB_NAME') ?: 'sys');
 define('DB_PORT', getenv('DB_PORT') ?: '4000');
 
 try {
-    // Explicitly require SSL for TiDB Cloud connection
+    // Explicitly require SSL for TiDB Cloud connection without empty CA file paths
     $options = array(
         PDO::MYSQL_ATTR_INIT_COMMAND => "SET NAMES 'utf8'",
         PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION,
-        PDO::MYSQL_ATTR_SSL_VERIFY_SERVER_CERT => false,
-        PDO::MYSQL_ATTR_SSL_CA => ''
+        PDO::MYSQL_ATTR_SSL_VERIFY_SERVER_CERT => false
     );
 
     $dbh = new PDO(

@@ -9,9 +9,14 @@ try {
     $options = array(
         PDO::MYSQL_ATTR_INIT_COMMAND => "SET NAMES 'utf8'",
         PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION,
-        PDO::MYSQL_ATTR_SSL_CA => __DIR__ . '/cacert.pem',
         PDO::MYSQL_ATTR_SSL_VERIFY_SERVER_CERT => false
     );
+
+    // Dynamically locate CA bundle without throwing fatal errors
+    $local_ca = __DIR__ . '/cacert.pem';
+    if (file_exists($local_ca)) {
+        $options[PDO::MYSQL_ATTR_SSL_CA] = $local_ca;
+    }
 
     $dbh = new PDO(
         "mysql:host=".DB_HOST.";port=".DB_PORT.";dbname=".DB_NAME, 

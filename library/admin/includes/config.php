@@ -6,16 +6,17 @@ define('DB_NAME', getenv('DB_NAME') ?: 'sys');
 define('DB_PORT', getenv('DB_PORT') ?: '4000');
 
 try {
+    $ca_path = __DIR__ . '/cacert.pem';
+
     $options = array(
         PDO::MYSQL_ATTR_INIT_COMMAND => "SET NAMES 'utf8'",
         PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION,
         PDO::MYSQL_ATTR_SSL_VERIFY_SERVER_CERT => false
     );
 
-    // Dynamically locate CA bundle without throwing fatal errors
-    $local_ca = __DIR__ . '/cacert.pem';
-    if (file_exists($local_ca)) {
-        $options[PDO::MYSQL_ATTR_SSL_CA] = $local_ca;
+    // Pass bundled CA file path to enforce TLS transport
+    if (file_exists($ca_path)) {
+        $options[PDO::MYSQL_ATTR_SSL_CA] = $ca_path;
     }
 
     $dbh = new PDO(

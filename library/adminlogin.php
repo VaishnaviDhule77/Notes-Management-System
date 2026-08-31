@@ -1,38 +1,40 @@
 <?php
-session_start();
-$_SESSION['alogin'] = "";
-
-// Display errors for debugging production/host issues
+// Force PHP to display all fatal errors on screen instead of a blank HTTP 500 page
 ini_set('display_errors', 1);
 ini_set('display_startup_errors', 1);
 error_reporting(E_ALL);
 
-include('includes/config.php');
+session_start();
 
-if(isset($_POST['login'])) {
+// Safely handle missing configuration file
+if (!file_exists(__DIR__ . '/includes/config.php')) {
+    die("Error: includes/config.php file not found in " . __DIR__);
+}
+include(__DIR__ . '/includes/config.php');
+
+if (isset($_POST['login'])) {
     try {
         $username = trim($_POST['username']);
         $password = md5($_POST['password']);
         
-        // Execute SQL check against the database
+        // Query the database
         $sql = "SELECT UserName, Password FROM admin WHERE UserName=:username AND Password=:password";
         $query = $dbh->prepare($sql);
         $query->bindParam(':username', $username, PDO::PARAM_STR);
         $query->bindParam(':password', $password, PDO::PARAM_STR);
         $query->execute();
-        $results = $query->fetchAll(PDO::FETCH_OBJ);
-
-        if($query->rowCount() > 0) {
+        
+        if ($query->rowCount() > 0) {
             $_SESSION['alogin'] = $username;
-            // Correct relative path for dashboard inside admin directory
             header("Location: dashboard.php");
             exit();
         } else {
             echo "<script>alert('Invalid Details');</script>";
         }
     } catch (PDOException $e) {
-        // Stop execution and print exact SQL failure instead of showing blank HTTP 500
-        die("LOGIN DB ERROR: " . $e->getMessage());
+        die("<h3>Database Query Error:</h3> " . $e->getMessage() . "<br><br><b>Tip:</b> Check if the <code>admin</code> table exists in your TiDB database.");
+    } catch (Exception $e) {
+        die("<h3>System Error:</h3> " . $e->getMessage());
     }
 }
 ?>
@@ -41,20 +43,18 @@ if(isset($_POST['login'])) {
 <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1" />
-    <meta name="description" content="" />
-    <meta name="author" content="" />
     <title>Online Notes Management System - Admin Login</title>
-    <!-- BOOTSTRAP CORE STYLE  -->
     <link href="assets/css/bootstrap.css" rel="stylesheet" />
-    <!-- FONT AWESOME STYLE  -->
     <link href="assets/css/font-awesome.css" rel="stylesheet" />
-    <!-- CUSTOM STYLE  -->
     <link href="assets/css/style.css" rel="stylesheet" />
-    <!-- GOOGLE FONT -->
-    <link href='https://fonts.googleapis.com/css?family=Open+Sans' rel='stylesheet' type='text/css' />
+    <link href="https://fonts.googleapis.com/css?family=Open+Sans" rel="stylesheet" type="text/css" />
 </head>
 <body>
-    <?php include('includes/header.php');?>
+    <?php 
+    if (file_exists(__DIR__ . '/includes/header.php')) {
+        include(__DIR__ . '/includes/header.php');
+    }
+    ?>
 
     <div class="content-wrapper">
         <div class="container">
@@ -67,9 +67,7 @@ if(isset($_POST['login'])) {
             <div class="row">
                 <div class="col-md-6 col-sm-6 col-xs-12 col-md-offset-3">
                     <div class="panel panel-info">
-                        <div class="panel-heading">
-                            LOGIN FORM
-                        </div>
+                        <div class="panel-heading">LOGIN FORM</div>
                         <div class="panel-body">
                             <form role="form" method="post">
                                 <div class="form-group">
@@ -80,8 +78,7 @@ if(isset($_POST['login'])) {
                                     <label>Password</label>
                                     <input class="form-control" type="password" name="password" autocomplete="off" required />
                                 </div>
-
-                                <button type="submit" name="login" class="btn btn-info">LOGIN </button>
+                                <button type="submit" name="login" class="btn btn-info">LOGIN</button>
                             </form>
                         </div>
                     </div>
@@ -90,7 +87,11 @@ if(isset($_POST['login'])) {
         </div>
     </div>
 
-    <?php include('includes/footer.php');?>
+    <?php 
+    if (file_exists(__DIR__ . '/includes/footer.php')) {
+        include(__DIR__ . '/includes/footer.php');
+    }
+    ?>
 
     <script src="assets/js/jquery-1.10.2.js"></script>
     <script src="assets/js/bootstrap.js"></script>

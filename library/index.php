@@ -27,8 +27,10 @@ if(isset($_POST['login'])) {
     if($query->rowCount() > 0) {
         foreach ($results as $result) {
             
-            // VERIFY THE INPUT AGAINST THE SECURE HASH FROM SIGNUP
-            if (password_verify($passwordInput, $result->Password)) {
+            // Checks password_verify() OR legacy MD5 hash compatibility
+            $isValidPassword = password_verify($passwordInput, $result->Password) || (md5($passwordInput) === $result->Password);
+
+            if ($isValidPassword) {
                 
                 $_SESSION['stdid'] = $result->StudentId;
                 

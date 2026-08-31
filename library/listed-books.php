@@ -13,7 +13,7 @@ if(strlen($_SESSION['login']) == 0) {
 <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1" />
-    <title>Online Notes Management System | Downloaded Notes/Books</title>
+    <title>Online Notes Management System | Listed Notes</title>
     <!-- BOOTSTRAP CORE STYLE -->
     <link href="assets/css/bootstrap.css" rel="stylesheet" />
     <!-- FONT AWESOME STYLE -->
@@ -22,38 +22,42 @@ if(strlen($_SESSION['login']) == 0) {
     <link href="assets/js/dataTables/dataTables.bootstrap.css" rel="stylesheet" />
     <!-- CUSTOM STYLE -->
     <link href="assets/css/style.css" rel="stylesheet" />
-    <!-- GOOGLE FONT -->
     <link href='http://fonts.googleapis.com/css?family=Open+Sans' rel='stylesheet' type='text/css' />
 </head>
 <body>
-    <!------MENU SECTION START-->
     <?php include('includes/header.php');?>
-    <!-- MENU SECTION END-->
 
     <div class="content-wrapper">
         <div class="container">
             <div class="row pad-botm">
                 <div class="col-md-12">
-                    <h4 class="header-line">Manage Listed Notes & Books</h4>
+                    <h4 class="header-line">Manage Listed Books & Notes</h4>
                 </div>
             </div>
 
             <div class="row">
                 <div class="col-md-12">
-                    <!-- Advanced Tables -->
                     <div class="panel panel-default">
                         <div class="panel-heading">
-                            Available Notes & Books
+                           Available Notes & Books
                         </div>
                         <div class="panel-body">
-                            <div class="row">
+                            <div class="table-responsive">
+                                <table class="table table-striped table-bordered table-hover" id="dataTables-example">
+                                    <thead>
+                                        <tr>
+                                            <th>#</th>
+                                            <th>Book Cover</th>
+                                            <th>Book Name</th>
+                                            <th>Category</th>
+                                            <th>Action</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
 <?php 
-$sql = "SELECT tblbooks.id as bookid, tblbooks.BookName, tblcategory.CategoryName, tblbooks.bookImage, tblbooks.bookpdf, 
-               COUNT(tblissuedbookdetails.id) AS issuedBooks
-        FROM tblbooks
-        LEFT JOIN tblissuedbookdetails ON tblissuedbookdetails.BookId = tblbooks.id
-        LEFT JOIN tblcategory ON tblcategory.id = tblbooks.CatId
-        GROUP BY tblbooks.id, tblbooks.BookName, tblcategory.CategoryName, tblbooks.bookImage, tblbooks.bookpdf";
+$sql = "SELECT tblbooks.id as bookid, tblbooks.BookName, tblcategory.CategoryName, tblbooks.bookImage, tblbooks.bookpdf 
+        FROM tblbooks 
+        LEFT JOIN tblcategory ON tblcategory.id = tblbooks.CatId";
 
 $query = $dbh->prepare($sql);
 $query->execute();
@@ -62,70 +66,59 @@ $cnt = 1;
 
 if($query->rowCount() > 0) {
     foreach($results as $result) { 
+        // Helper to handle missing dot extension in db record (e.g. filenamejpeg -> filename.jpeg)
+        $imgName = $result->bookImage;
+        if (!empty($imgName) && !str_contains($imgName, '.')) {
+            $imgName = preg_replace('/(jpeg|jpg|png)$/i', '.$1', $imgName);
+        }
+
+        $pdfName = $result->bookpdf;
+        if (!empty($pdfName) && !str_contains($pdfName, '.')) {
+            $pdfName = preg_replace('/(pdf)$/i', '.$1', $pdfName);
+        }
 ?>  
-                                <div class="col-md-4 col-sm-6" style="min-height: 220px; margin-bottom: 20px;">
-                                    <table class="table table-bordered">
-                                        <tr>
-                                            <td rowspan="2" style="width: 130px; text-align: center; vertical-align: middle;">
-                                                <?php if(!empty($result->bookImage)) { ?>
-                                                    <img src="admin/bookimg/<?php echo htmlentities($result->bookImage);?>" width="110" height="140" style="object-fit: cover; border-radius: 4px;" alt="Book Cover">
+                                        <tr class="odd gradeX">
+                                            <td class="center" style="vertical-align: middle;"><?php echo htmlentities($cnt);?></td>
+                                            <td class="center" style="width: 110px; text-align: center; vertical-align: middle;">
+                                                <?php if(!empty($imgName)) { ?>
+                                                    <!-- Path updated to library/admin/bookimg/ -->
+                                                    <img src="library/admin/bookimg/<?php echo htmlentities($imgName);?>" width="70" height="95" style="object-fit: cover; border: 1px solid #ccc; padding: 2px; border-radius: 3px;" alt="Cover">
                                                 <?php } else { ?>
-                                                    <span class="label label-default">No Cover</span>
+                                                    <span class="label label-default">No Image</span>
                                                 <?php } ?>
                                             </td>
-                                            <th style="width: 30%;">Book Name</th>
-                                            <td><strong><?php echo htmlentities($result->BookName);?></strong></td>
-                                        </tr>
-                                        <tr>
-                                            <th>Category</th>
-                                            <td><?php echo htmlentities($result->CategoryName ? $result->CategoryName : 'Uncategorized');?></td>
-                                        </tr>
-                                        <tr>
-                                            <td colspan="3" class="text-center">
-                                                <?php if(!empty($result->bookpdf)) { ?>
-                                                    <a href="admin/bookpdf/<?php echo htmlentities($result->bookpdf);?>" target="_blank" class="btn btn-success btn-block">
-                                                        <i class="fa fa-download"></i> Download PDF
+                                            <td style="vertical-align: middle;"><strong><?php echo htmlentities($result->BookName);?></strong></td>
+                                            <td style="vertical-align: middle;"><?php echo htmlentities($result->CategoryName ? $result->CategoryName : 'Uncategorized');?></td>
+                                            <td class="center" style="vertical-align: middle;">
+                                                <?php if(!empty($pdfName)) { ?>
+                                                    <!-- Path updated to library/admin/bookpdf/ -->
+                                                    <a href="library/admin/bookpdf/<?php echo htmlentities($pdfName);?>" target="_blank" class="btn btn-primary btn-sm">
+                                                        <i class="fa fa-download"></i> Download / View PDF
                                                     </a>
                                                 <?php } else { ?>
-                                                    <button class="btn btn-danger btn-block" disabled>No File Available</button>
+                                                    <span class="label label-danger">No File</span>
                                                 <?php } ?>
                                             </td>
                                         </tr>
-                                    </table>
-                                </div>
 <?php 
         $cnt++;
     }
-} else { 
-?>
-                                <div class="col-md-12">
-                                    <div class="alert alert-info text-center">
-                                        No notes or books are currently available in the database.
-                                    </div>
-                                </div>
-<?php } ?> 
+} ?>
+                                    </tbody>
+                                </table>
                             </div>
                         </div>
                     </div>
-                    <!--End Advanced Tables -->
                 </div>
             </div>
         </div>
     </div>
 
-    <!-- CONTENT-WRAPPER SECTION END-->
     <?php include('includes/footer.php');?>
-    <!-- FOOTER SECTION END-->
-
-    <!-- JAVASCRIPT FILES PLACED AT THE BOTTOM TO REDUCE THE LOADING TIME -->
-    <!-- CORE JQUERY -->
     <script src="assets/js/jquery-1.10.2.js"></script>
-    <!-- BOOTSTRAP SCRIPTS -->
     <script src="assets/js/bootstrap.js"></script>
-    <!-- DATATABLE SCRIPTS -->
     <script src="assets/js/dataTables/jquery.dataTables.js"></script>
     <script src="assets/js/dataTables/dataTables.bootstrap.js"></script>
-    <!-- CUSTOM SCRIPTS -->
     <script src="assets/js/custom.js"></script>
 </body>
 </html>

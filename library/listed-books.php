@@ -66,22 +66,47 @@ $cnt = 1;
 
 if($query->rowCount() > 0) {
     foreach($results as $result) { 
-        // Normalize filename if missing dot extension
+        // 1. Normalize image extension if dot is missing in DB
         $imgName = $result->bookImage;
         if (!empty($imgName) && !str_contains($imgName, '.')) {
             $imgName = preg_replace('/(jpeg|jpg|png)$/i', '.$1', $imgName);
         }
 
+        // 2. Resolve correct Image path
+        $imgPath = "";
+        if (!empty($imgName)) {
+            if (file_exists("admin/bookimg/" . $imgName)) {
+                $imgPath = "admin/bookimg/" . $imgName;
+            } elseif (file_exists("library/admin/bookimg/" . $imgName)) {
+                $imgPath = "library/admin/bookimg/" . $imgName;
+            } else {
+                $imgPath = "admin/bookimg/" . $imgName; // Default fallback
+            }
+        }
+
+        // 3. Normalize PDF extension if dot is missing in DB
         $pdfName = $result->bookpdf;
         if (!empty($pdfName) && !str_contains($pdfName, '.')) {
             $pdfName = preg_replace('/(pdf)$/i', '.$1', $pdfName);
+        }
+
+        // 4. Resolve correct PDF path
+        $pdfPath = "";
+        if (!empty($pdfName)) {
+            if (file_exists("admin/bookpdf/" . $pdfName)) {
+                $pdfPath = "admin/bookpdf/" . $pdfName;
+            } elseif (file_exists("library/admin/bookpdf/" . $pdfName)) {
+                $pdfPath = "library/admin/bookpdf/" . $pdfName;
+            } else {
+                $pdfPath = "admin/bookpdf/" . $pdfName; // Default fallback
+            }
         }
 ?>  
                                         <tr class="odd gradeX">
                                             <td class="center" style="vertical-align: middle;"><?php echo htmlentities($cnt);?></td>
                                             <td class="center" style="width: 110px; text-align: center; vertical-align: middle;">
-                                                <?php if(!empty($imgName)) { ?>
-                                                    <img src="admin/bookimg/<?php echo htmlentities($imgName);?>" width="70" height="95" style="object-fit: cover; border: 1px solid #ccc; padding: 2px; border-radius: 3px;" alt="Cover">
+                                                <?php if(!empty($imgPath)) { ?>
+                                                    <img src="<?php echo htmlentities($imgPath);?>" width="70" height="95" style="object-fit: cover; border: 1px solid #ccc; padding: 2px; border-radius: 3px;" alt="Cover">
                                                 <?php } else { ?>
                                                     <span class="label label-default">No Image</span>
                                                 <?php } ?>
@@ -89,8 +114,8 @@ if($query->rowCount() > 0) {
                                             <td style="vertical-align: middle;"><strong><?php echo htmlentities($result->BookName);?></strong></td>
                                             <td style="vertical-align: middle;"><?php echo htmlentities($result->CategoryName ? $result->CategoryName : 'Uncategorized');?></td>
                                             <td class="center" style="vertical-align: middle;">
-                                                <?php if(!empty($pdfName)) { ?>
-                                                    <a href="admin/bookpdf/<?php echo htmlentities($pdfName);?>" target="_blank" class="btn btn-primary btn-sm">
+                                                <?php if(!empty($pdfPath)) { ?>
+                                                    <a href="<?php echo htmlentities($pdfPath);?>" target="_blank" class="btn btn-primary btn-sm">
                                                         <i class="fa fa-download"></i> Download / View PDF
                                                     </a>
                                                 <?php } else { ?>

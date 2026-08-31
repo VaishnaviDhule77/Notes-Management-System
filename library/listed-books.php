@@ -66,7 +66,7 @@ $cnt = 1;
 
 if($query->rowCount() > 0) {
     foreach($results as $result) { 
-        // Helper to handle missing dot extension in db record (e.g. filenamejpeg -> filename.jpeg)
+        // Normalize filename if missing dot extension
         $imgName = $result->bookImage;
         if (!empty($imgName) && !str_contains($imgName, '.')) {
             $imgName = preg_replace('/(jpeg|jpg|png)$/i', '.$1', $imgName);
@@ -81,8 +81,7 @@ if($query->rowCount() > 0) {
                                             <td class="center" style="vertical-align: middle;"><?php echo htmlentities($cnt);?></td>
                                             <td class="center" style="width: 110px; text-align: center; vertical-align: middle;">
                                                 <?php if(!empty($imgName)) { ?>
-                                                    <!-- Path updated to library/admin/bookimg/ -->
-                                                    <img src="library/admin/bookimg/<?php echo htmlentities($imgName);?>" width="70" height="95" style="object-fit: cover; border: 1px solid #ccc; padding: 2px; border-radius: 3px;" alt="Cover">
+                                                    <img src="admin/bookimg/<?php echo htmlentities($imgName);?>" width="70" height="95" style="object-fit: cover; border: 1px solid #ccc; padding: 2px; border-radius: 3px;" alt="Cover">
                                                 <?php } else { ?>
                                                     <span class="label label-default">No Image</span>
                                                 <?php } ?>
@@ -91,8 +90,7 @@ if($query->rowCount() > 0) {
                                             <td style="vertical-align: middle;"><?php echo htmlentities($result->CategoryName ? $result->CategoryName : 'Uncategorized');?></td>
                                             <td class="center" style="vertical-align: middle;">
                                                 <?php if(!empty($pdfName)) { ?>
-                                                    <!-- Path updated to library/admin/bookpdf/ -->
-                                                    <a href="library/admin/bookpdf/<?php echo htmlentities($pdfName);?>" target="_blank" class="btn btn-primary btn-sm">
+                                                    <a href="admin/bookpdf/<?php echo htmlentities($pdfName);?>" target="_blank" class="btn btn-primary btn-sm">
                                                         <i class="fa fa-download"></i> Download / View PDF
                                                     </a>
                                                 <?php } else { ?>

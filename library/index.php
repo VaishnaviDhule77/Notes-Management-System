@@ -1,24 +1,24 @@
 <?php
+ob_start(); // Prevent header modification issues
 session_start();
 include('includes/config.php');
 
-// 1. CLEAR ERRORS FOR LIVE SITE
+// Clear errors for live site
 error_reporting(0); 
 ini_set('display_errors', 0);
 
-// 2. SECURE GUARD: If a user is already logged in, send them straight to the dashboard
+// Guard: Redirect if already logged in
 if(isset($_SESSION['login']) && $_SESSION['login'] != '') {
     header("Location: dashboard.php");
     exit();
 }
 
-// 3. LOGIN PROCESSING
+// Login Processing
 if(isset($_POST['login'])) {
     $email = trim($_POST['emailid']);
     $passwordInput = trim($_POST['password']); 
-    
-    // Select user data matching strictly by the unique email address
-    $sql = "SELECT EmailId, Password, StudentId, Status FROM tblstudents WHERE EmailId=:email";
+
+    $sql = "SELECT id, EmailId, Password, StudentId, Status FROM tblstudents WHERE EmailId=:email";
     $query = $dbh->prepare($sql);
     $query->bindParam(':email', $email, PDO::PARAM_STR);
     $query->execute();
@@ -27,30 +27,38 @@ if(isset($_POST['login'])) {
     if($query->rowCount() > 0) {
         foreach ($results as $result) {
             
-            // Checks password_verify() OR legacy MD5 hash compatibility
-            $isValidPassword = password_verify($passwordInput, $result->Password) || (md5($passwordInput) === $result->Password);
+            $isValidPassword = false;
+            
+            // Validate password using password_verify OR MD5
+            if (password_verify($passwordInput, $result->Password)) {
+                $isValidPassword = true;
+            } elseif (md5($passwordInput) === $result->Password) {
+                $isValidPassword = true;
+                
+                // Auto-upgrade legacy MD5 hash to modern secure hash
+                $newHash = password_hash($passwordInput, PASSWORD_DEFAULT);
+                $updateSql = "UPDATE tblstudents SET Password=:newhash WHERE id=:id";
+                $updateQuery = $dbh->prepare($updateSql);
+                $updateQuery->bindParam(':newhash', $newHash, PDO::PARAM_STR);
+                $updateQuery->bindParam(':id', $result->id, PDO::PARAM_INT);
+                $updateQuery->execute();
+            }
 
             if ($isValidPassword) {
-                
                 $_SESSION['stdid'] = $result->StudentId;
                 
-                // Check if account is active (1) or newly registered default (0 or 1)
                 if($result->Status == 1 || $result->Status == 0) {
                     $_SESSION['login'] = $email;
-                    
-                    // Professional Server-Side Redirection
                     header("Location: dashboard.php");
                     exit();
                 } else {
                     echo "<script>alert('Your Account Has been blocked. Please contact admin');</script>";
                 }
             } else {
-                // Runs if the password check fails
                 echo "<script>alert('Invalid Details');</script>";
             }
         }
     } else {
-        // Runs if the email address doesn't exist in the database
         echo "<script>alert('Invalid Details');</script>";
     }
 }
@@ -60,7 +68,7 @@ if(isset($_POST['login'])) {
 <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1" />
-    <title>Online notes Management System</title>
+    <title>Online Notes Management System | User Login</title>
     <link href="assets/css/bootstrap.css" rel="stylesheet" />
     <link href="assets/css/font-awesome.css" rel="stylesheet" />
     <link href="assets/css/style.css" rel="stylesheet" />
@@ -112,7 +120,7 @@ if(isset($_POST['login'])) {
                             <input class="form-control" type="password" name="password" required autocomplete="off" />
                             <p class="help-block"><a href="user-forgot-password.php">Forgot Password</a></p>
                         </div>
-                        <button type="submit" name="login" class="btn btn-info">LOGIN </button> | <a href="signup.php">Not Register Yet</a>
+                        <button type="submit" name="login" class="btn btn-info">LOGIN </button> | <a href="signup.php">Not Registered Yet?</a>
                     </form>
                 </div>
             </div>

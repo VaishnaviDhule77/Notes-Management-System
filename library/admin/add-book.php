@@ -1,74 +1,91 @@
 <?php
-// This stops the Warning from printing and breaking the session
+// Prevent warnings from breaking output
 ini_set('display_errors', 0); 
 ob_start();
 session_start();
 
-// 2. Suppress warnings in production to prevent UI breakage
-// (If you still have issues, change this to E_ALL to debug)
 error_reporting(E_ALL & ~E_NOTICE & ~E_WARNING); 
 
 include('includes/config.php');
 
-// 3. Robust Session Check
+// Helper function to upload files directly to Cloudinary via REST API
+function uploadToCloudinary($fileTmpPath, $fileName) {
+    if (empty($fileTmpPath)) return null;
+
+    $cloudName = 'aomhlytt';
+    $uploadPreset = 'notes_preset';
+    $url = "https://api.cloudinary.com/v1_1/" . $cloudName . "/auto/upload";
+    
+    $cFile = new CURLFile($fileTmpPath, mime_content_type($fileTmpPath), $fileName);
+    $postFields = array(
+        'file' => $cFile,
+        'upload_preset' => $uploadPreset
+    );
+
+    $ch = curl_init();
+    curl_setopt($ch, CURLOPT_URL, $url);
+    curl_setopt($ch, CURLOPT_POST, 1);
+    curl_setopt($ch, CURLOPT_POSTFIELDS, $postFields);
+    curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+    
+    $response = curl_exec($ch);
+    curl_close($ch);
+    
+    $result = json_decode($response, true);
+    return isset($result['secure_url']) ? $result['secure_url'] : null;
+}
+
+// Session Check
 if(!isset($_SESSION['alogin']) || strlen((string)$_SESSION['alogin']) == 0) {   
     header('location:index.php');
     exit();
 } else { 
     if(isset($_POST['add'])) {
-        // 4. Verification: If the upload was too large, $_POST will be empty.
         if(empty($_POST['bookname']) && empty($_FILES)) {
             echo "<script>alert('Error: The file is too large for the server to process.');</script>";
         } else {
             $bookname = $_POST['bookname'];
             $category = $_POST['category'];
             
-            // Check if files were actually uploaded
             if(!empty($_FILES["bookpic"]["name"]) && !empty($_FILES["bookpdf"]["name"])) {
                 
                 $bookimg = $_FILES["bookpic"]["name"];
                 $bookpdf = $_FILES["bookpdf"]["name"];
 
-                // 5. Use pathinfo for safer extension detection
                 $extension = strtolower(pathinfo($bookimg, PATHINFO_EXTENSION));
                 $extension2 = strtolower(pathinfo($bookpdf, PATHINFO_EXTENSION));
 
                 $allowed_extensions = array("jpg", "jpeg", "png", "gif");
                 $allowed_extensions2 = array("pdf");
 
-                // Generate unique names
-                $imgnewname = md5($bookimg . time()) . "." . $extension;
-                $pdfnewname = md5($bookpdf . time()) . "." . $extension2;
-
                 if(!in_array($extension, $allowed_extensions)) {
                     echo "<script>alert('Invalid image format. Only jpg/jpeg/png/gif allowed');</script>";
                 } else if(!in_array($extension2, $allowed_extensions2)) {
                     echo "<script>alert('Invalid PDF format. Only PDF allowed');</script>";
                 } else {
-                    // 6. Attempt to move files
-                    if(move_uploaded_file($_FILES["bookpic"]["tmp_name"], "bookimg/" . $imgnewname)) {
-                        if(move_uploaded_file($_FILES["bookpdf"]["tmp_name"], "bookpdf/" . $pdfnewname)) {
-                            
-                            $sql = "INSERT INTO tblbooks(BookName, CatId, bookImage, bookpdf) VALUES(:bookname, :category, :imgnewname, :pdfnewname)";
-                            $query = $dbh->prepare($sql);
-                            $query->bindParam(':bookname', $bookname, PDO::PARAM_STR);
-                            $query->bindParam(':category', $category, PDO::PARAM_STR);
-                            $query->bindParam(':imgnewname', $imgnewname, PDO::PARAM_STR);
-                            $query->bindParam(':pdfnewname', $pdfnewname, PDO::PARAM_STR);
-                            $query->execute();
-                            
-                            $lastInsertId = $dbh->lastInsertId();
-                            if($lastInsertId) {
-                                echo "<script>alert('Book Listed successfully');</script>";
-                                echo "<script>window.location.href='manage-books.php'</script>";
-                            } else {
-                                echo "<script>alert('Something went wrong with the database. Please try again');</script>";
-                            }
+                    // Upload files to Cloudinary instead of local folder
+                    $imgUrl = uploadToCloudinary($_FILES["bookpic"]["tmp_name"], $bookimg);
+                    $pdfUrl = uploadToCloudinary($_FILES["bookpdf"]["tmp_name"], $bookpdf);
+
+                    if($imgUrl && $pdfUrl) {
+                        // Store full Cloudinary HTTPS URLs directly into TiDB database
+                        $sql = "INSERT INTO tblbooks(BookName, CatId, bookImage, bookpdf) VALUES(:bookname, :category, :imgurl, :pdfurl)";
+                        $query = $dbh->prepare($sql);
+                        $query->bindParam(':bookname', $bookname, PDO::PARAM_STR);
+                        $query->bindParam(':category', $category, PDO::PARAM_STR);
+                        $query->bindParam(':imgurl', $imgUrl, PDO::PARAM_STR);
+                        $query->bindParam(':pdfurl', $pdfUrl, PDO::PARAM_STR);
+                        $query->execute();
+                        
+                        $lastInsertId = $dbh->lastInsertId();
+                        if($lastInsertId) {
+                            echo "<script>alert('Book Listed successfully on Cloudinary!');</script>";
+                            echo "<script>window.location.href='manage-books.php'</script>";
                         } else {
-                            echo "<script>alert('Failed to upload PDF. Check folder permissions.');</script>";
+                            echo "<script>alert('Something went wrong with the database. Please try again');</script>";
                         }
                     } else {
-                        echo "<script>alert('Failed to upload Image. Check folder permissions.');</script>";
+                        echo "<script>alert('Cloudinary Upload Failed. Please check network connection.');</script>";
                     }
                 }
             } else {
@@ -158,6 +175,5 @@ if(!isset($_SESSION['alogin']) || strlen((string)$_SESSION['alogin']) == 0) {
 </body>
 </html>
 <?php 
-// End buffering and flush
 ob_end_flush(); 
 ?>

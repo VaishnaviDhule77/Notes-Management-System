@@ -66,27 +66,34 @@ $cnt = 1;
 
 if($query->rowCount() > 0) {
     foreach($results as $result) { 
-        // 1. Fix missing dot in DB image filename (e.g. filenamejpeg -> filename.jpeg)
-        $imgName = trim($result->bookImage);
-        if (!empty($imgName) && !str_contains($imgName, '.')) {
-            $imgName = preg_replace('/(jpeg|jpg|png)$/i', '.$1', $imgName);
+        $imgRaw = trim($result->bookImage);
+        $pdfRaw = trim($result->bookpdf);
+
+        // Check if image is a full URL (Cloudinary) or local path
+        if (filter_var($imgRaw, FILTER_VALIDATE_URL)) {
+            $imgUrl = $imgRaw;
+        } elseif (!empty($imgRaw)) {
+            $imgName = !str_contains($imgRaw, '.') ? preg_replace('/(jpeg|jpg|png)$/i', '.$1', $imgRaw) : $imgRaw;
+            $imgUrl = "admin/bookimg/" . $imgName;
+        } else {
+            $imgUrl = "";
         }
 
-        // 2. Fix missing dot in DB PDF filename
-        $pdfName = trim($result->bookpdf);
-        if (!empty($pdfName) && !str_contains($pdfName, '.')) {
-            $pdfName = preg_replace('/(pdf)$/i', '.$1', $pdfName);
+        // Check if PDF is a full URL (Cloudinary) or local path
+        if (filter_var($pdfRaw, FILTER_VALIDATE_URL)) {
+            $pdfUrl = $pdfRaw;
+        } elseif (!empty($pdfRaw)) {
+            $pdfName = !str_contains($pdfRaw, '.') ? preg_replace('/(pdf)$/i', '.$1', $pdfRaw) : $pdfRaw;
+            $pdfUrl = "admin/bookpdf/" . $pdfName;
+        } else {
+            $pdfUrl = "";
         }
-
-        // 3. Construct Root-Relative URLs (Works regardless of working directory)
-        $imgUrl = !empty($imgName) ? "admin/bookimg/" . $imgName : "";
-        $pdfUrl = !empty($pdfName) ? "admin/bookpdf/" . $pdfName : "";
 ?>  
                                         <tr class="odd gradeX">
                                             <td class="center" style="vertical-align: middle;"><?php echo htmlentities($cnt);?></td>
                                             <td class="center" style="width: 110px; text-align: center; vertical-align: middle;">
                                                 <?php if(!empty($imgUrl)) { ?>
-                                                    <img src="<?php echo htmlentities($imgUrl);?>" width="70" height="95" style="object-fit: cover; border: 1px solid #ccc; padding: 2px; border-radius: 3px;" alt="Cover" onerror="this.onerror=null; this.src='library/admin/bookimg/<?php echo htmlentities($imgName);?>';">
+                                                    <img src="<?php echo htmlentities($imgUrl);?>" width="70" height="95" style="object-fit: cover; border: 1px solid #ccc; padding: 2px; border-radius: 3px;" alt="Cover">
                                                 <?php } else { ?>
                                                     <span class="label label-default">No Image</span>
                                                 <?php } ?>

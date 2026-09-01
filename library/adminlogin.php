@@ -15,21 +15,27 @@ include(__DIR__ . '/includes/config.php');
 if (isset($_POST['login'])) {
     try {
         $username = trim($_POST['username']);
-        $password = md5($_POST['password']);
+        $password = trim($_POST['password']);
+        $hashed_password = md5($password);
         
-        // Query the database
-        $sql = "SELECT UserName, Password FROM admin WHERE UserName=:username AND Password=:password";
+        // Query the database checking both MD5 and plain password
+        $sql = "SELECT id, UserName, Password FROM admin WHERE UserName=:username AND (Password=:password OR Password=:hashed_password)";
         $query = $dbh->prepare($sql);
         $query->bindParam(':username', $username, PDO::PARAM_STR);
         $query->bindParam(':password', $password, PDO::PARAM_STR);
+        $query->bindParam(':hashed_password', $hashed_password, PDO::PARAM_STR);
         $query->execute();
+        $results = $query->fetchAll(PDO::FETCH_OBJ);
         
         if ($query->rowCount() > 0) {
-            $_SESSION['alogin'] = $username;
-            header("Location: dashboard.php");
+            $_SESSION['alogin'] = $results[0]->UserName;
+            $_SESSION['adminid'] = $results[0]->id;
+            
+            // Redirect explicitly to admin/dashboard.php or admin/index.php
+            echo "<script type='text/javascript'> document.location ='admin/dashboard.php'; </script>";
             exit();
         } else {
-            echo "<script>alert('Invalid Details');</script>";
+            echo "<script>alert('Invalid Username or Password');</script>";
         }
     } catch (PDOException $e) {
         die("<h3>Database Query Error:</h3> " . $e->getMessage() . "<br><br><b>Tip:</b> Check if the <code>admin</code> table exists in your TiDB database.");
@@ -63,7 +69,7 @@ if (isset($_POST['login'])) {
                     <h4 class="header-line">ADMIN LOGIN FORM</h4>
                 </div>
             </div>
-                     
+                      
             <div class="row">
                 <div class="col-md-6 col-sm-6 col-xs-12 col-md-offset-3">
                     <div class="panel panel-info">

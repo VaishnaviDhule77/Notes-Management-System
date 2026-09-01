@@ -14,13 +14,9 @@ if(strlen($_SESSION['login']) == 0) {
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1" />
     <title>Online Notes Management System | Listed Notes</title>
-    <!-- BOOTSTRAP CORE STYLE -->
     <link href="assets/css/bootstrap.css" rel="stylesheet" />
-    <!-- FONT AWESOME STYLE -->
     <link href="assets/css/font-awesome.css" rel="stylesheet" />
-    <!-- DATATABLE STYLE -->
     <link href="assets/js/dataTables/dataTables.bootstrap.css" rel="stylesheet" />
-    <!-- CUSTOM STYLE -->
     <link href="assets/css/style.css" rel="stylesheet" />
     <link href='http://fonts.googleapis.com/css?family=Open+Sans' rel='stylesheet' type='text/css' />
 </head>
@@ -66,28 +62,12 @@ $cnt = 1;
 
 if($query->rowCount() > 0) {
     foreach($results as $result) { 
-        $imgRaw = trim($result->bookImage);
-        $pdfRaw = trim($result->bookpdf);
+        $imgName = trim($result->bookImage);
+        $pdfName = trim($result->bookpdf);
 
-        // Check if image is a full URL (Cloudinary) or local path
-        if (filter_var($imgRaw, FILTER_VALIDATE_URL)) {
-            $imgUrl = $imgRaw;
-        } elseif (!empty($imgRaw)) {
-            $imgName = !str_contains($imgRaw, '.') ? preg_replace('/(jpeg|jpg|png)$/i', '.$1', $imgRaw) : $imgRaw;
-            $imgUrl = "admin/bookimg/" . $imgName;
-        } else {
-            $imgUrl = "";
-        }
-
-        // Check if PDF is a full URL (Cloudinary) or local path
-        if (filter_var($pdfRaw, FILTER_VALIDATE_URL)) {
-            $pdfUrl = $pdfRaw;
-        } elseif (!empty($pdfRaw)) {
-            $pdfName = !str_contains($pdfRaw, '.') ? preg_replace('/(pdf)$/i', '.$1', $pdfRaw) : $pdfRaw;
-            $pdfUrl = "admin/bookpdf/" . $pdfName;
-        } else {
-            $pdfUrl = "";
-        }
+        // Path relative to where listed-books.php is located
+        $imgUrl = !empty($imgName) ? "admin/bookimg/" . $imgName : "";
+        $pdfUrl = !empty($pdfName) ? "admin/bookpdf/" . $pdfName : "";
 ?>  
                                         <tr class="odd gradeX">
                                             <td class="center" style="vertical-align: middle;"><?php echo htmlentities($cnt);?></td>

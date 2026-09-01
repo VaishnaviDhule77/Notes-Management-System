@@ -62,35 +62,17 @@ $cnt = 1;
 
 if($query->rowCount() > 0) {
     foreach($results as $result) { 
-        $imgRaw = trim($result->bookImage);
-        $pdfRaw = trim($result->bookpdf);
+        $imgName = trim($result->bookImage);
+        $pdfName = trim($result->bookpdf);
 
-        // Insert missing dot into file extensions (e.g., filenamejpeg -> filename.jpeg)
-        if (!empty($imgRaw) && !str_contains($imgRaw, '.')) {
-            $imgRaw = preg_replace('/(jpeg|jpg|png)$/i', '.$1', $imgRaw);
-        }
-        if (!empty($pdfRaw) && !str_contains($pdfRaw, '.')) {
-            $pdfRaw = preg_replace('/(pdf)$/i', '.$1', $pdfRaw);
-        }
-
-        // Detect correct path relative to library/listed-books.php
-        if (file_exists("admin/bookimg/" . $imgRaw)) {
-            $imgUrl = "admin/bookimg/" . $imgRaw;
-        } else {
-            $imgUrl = "bookimg/" . $imgRaw;
-        }
-
-        if (file_exists("admin/bookpdf/" . $pdfRaw)) {
-            $pdfUrl = "admin/bookpdf/" . $pdfRaw;
-        } else {
-            $pdfUrl = "bookpdf/" . $pdfRaw;
-        }
+        $imgUrl = !empty($imgName) ? "admin/bookimg/" . $imgName : "";
+        $pdfUrl = !empty($pdfName) ? "admin/bookpdf/" . $pdfName : "";
 ?>  
                                         <tr class="odd gradeX">
                                             <td class="center" style="vertical-align: middle;"><?php echo htmlentities($cnt);?></td>
                                             <td class="center" style="width: 110px; text-align: center; vertical-align: middle;">
-                                                <?php if(!empty($imgRaw)) { ?>
-                                                    <img src="<?php echo htmlentities($imgUrl);?>" width="70" height="95" style="object-fit: cover; border: 1px solid #ccc; padding: 2px; border-radius: 3px;" alt="Cover" onerror="this.onerror=null; this.src='admin/bookimg/<?php echo htmlentities($imgRaw);?>';">
+                                                <?php if(!empty($imgUrl)) { ?>
+                                                    <img src="<?php echo htmlentities($imgUrl);?>" width="70" height="95" style="object-fit: cover; border: 1px solid #ccc; padding: 2px; border-radius: 3px;" alt="Cover">
                                                 <?php } else { ?>
                                                     <span class="label label-default">No Image</span>
                                                 <?php } ?>
@@ -98,7 +80,7 @@ if($query->rowCount() > 0) {
                                             <td style="vertical-align: middle;"><strong><?php echo htmlentities($result->BookName);?></strong></td>
                                             <td style="vertical-align: middle;"><?php echo htmlentities($result->CategoryName ? $result->CategoryName : 'Uncategorized');?></td>
                                             <td class="center" style="vertical-align: middle;">
-                                                <?php if(!empty($pdfRaw)) { ?>
+                                                <?php if(!empty($pdfUrl)) { ?>
                                                     <a href="<?php echo htmlentities($pdfUrl);?>" target="_blank" class="btn btn-primary btn-sm">
                                                         <i class="fa fa-download"></i> Download / View PDF
                                                     </a>
